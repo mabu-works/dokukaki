@@ -32,5 +32,5 @@ PDFや画像（PNG/JPG）を開いて、その場で手書きやテキストで�
 - 素の HTML / CSS / JavaScript ＋ 同梱の pdf.js のみ。フォントはシステムの日本語フォントスタック。
 - pdf.js は cdnjs の 3.11.174 を `lib/pdf.min.js` / `lib/pdf.worker.min.js` として同梱し、`workerSrc` にはローカルパスを指定しています。実行時に外部 CDN へはアクセスしません。
 - 各ページはベース Canvas（PDF／画像の描画）と注釈 Canvas（書き込み）を別々に保持し、表示時は重ねて、書き出し時は合成して PNG 化します。
-- 自動保存のキーは `kakiko:<ファイル名>:<サイズ>:<最終更新日時>` です。保存先は同一ブラウザの localStorage のみで、外部には送信されません。
-- Service Worker（sw.js）が同一オリジンの GET をキャッシュします（キャッシュ名: kakiko-v1、pdf.js を含む）。
+- 自動保存のキーは `dokukaki:<ファイル名>:<サイズ>:<最終更新日時>` です。保存先は同一ブラウザの localStorage のみで、外部には送信されません。
+- Service Worker（sw.js）が同一オリジンの GET をキャッシュします（キャッシュ名: dokukaki-v1、pdf.js を含む）。
