@@ -1,4 +1,4 @@
-const CACHE_NAME = "dokukaki-v1";
+const CACHE_NAME = "dokukaki-v2";
 const CORE = [
   "./",
   "./index.html",

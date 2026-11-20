@@ -5,14 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ドクカキ｜ドキュメント書き込みツール</title>
 <meta name="description" content="PDFや画像を開いて、その場で手書き・テキストで書き込めるWebツール。ファイルはブラウザの外に送信されません。">
-<meta name="theme-color" content="#1971c2">
+<meta name="theme-color" content="#0a0f1c">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<script>
+try {
+  var savedTheme = localStorage.getItem("dokukaki-theme");
+  if (savedTheme === "light" || savedTheme === "dark") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) { /* テーマ保存が使えない環境ではダークを既定にする */ }
+</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="site-header">
+<nav class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top">ドクカキ</a>
+    <span class="nav-note">ファイルはブラウザの外に送信されません</span>
+    <span class="topbar-actions">
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え">🌙</button>
+    </span>
+  </div>
+</nav>
+
+<header class="site-header" id="top">
+  <p class="eyebrow">DOCUMENT ANNOTATION</p>
   <h1>ドクカキ</h1>
   <p class="tagline">ドキュメント書き込みツール</p>
   <p class="privacy-note">ファイルはブラウザの外に送信されません。すべての処理はこの端末の中で行われます。</p>

@@ -16,7 +16,7 @@ PDFや画像（PNG/JPG）を開いて、その場で手書きやテキストで�
 - 書き込みデータを localStorage に自動保存（ファイル名＋サイズ＋最終更新日時で識別し、同じファイルを開き直すと復元）。「保存した書き込みを消す」ボタンで削除可能
 - PNG書き出し：現在のページ（書き込み合成済み）／全ページ
 - PWA対応（ホーム画面に追加可能、オフラインキャッシュ。pdf.js もキャッシュ対象）
-- ダークモード対応（prefers-color-scheme）
+- テーマ切り替え対応（ダーク既定／ライト、選択は localStorage の `dokukaki-theme` に保存。書き込み保存のキーとは別）
 
 ## 使い方
 
@@ -33,4 +33,4 @@ PDFや画像（PNG/JPG）を開いて、その場で手書きやテキストで�
 - pdf.js は cdnjs の 3.11.174 を `lib/pdf.min.js` / `lib/pdf.worker.min.js` として同梱し、`workerSrc` にはローカルパスを指定しています。実行時に外部 CDN へはアクセスしません。
 - 各ページはベース Canvas（PDF／画像の描画）と注釈 Canvas（書き込み）を別々に保持し、表示時は重ねて、書き出し時は合成して PNG 化します。
 - 自動保存のキーは `dokukaki:<ファイル名>:<サイズ>:<最終更新日時>` です。保存先は同一ブラウザの localStorage のみで、外部には送信されません。
-- Service Worker（sw.js）が同一オリジンの GET をキャッシュします（キャッシュ名: dokukaki-v1、pdf.js を含む）。
+- Service Worker（sw.js）が同一オリジンの GET をキャッシュします（キャッシュ名: dokukaki-v2、pdf.js を含む）。

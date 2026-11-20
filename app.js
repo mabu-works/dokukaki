@@ -1,5 +1,29 @@
 "use strict";
 
+// ===== テーマ（ダーク既定／ライト切り替え、dokukaki-theme に保存） =====
+(function initTheme() {
+  var root = document.documentElement;
+  if (!root || !root.getAttribute || !root.setAttribute) return;
+  function apply(theme) {
+    root.setAttribute("data-theme", theme);
+    var btn = document.getElementById("themeToggle");
+    if (btn) btn.textContent = theme === "light" ? "☀️" : "🌙";
+  }
+  var current = root.getAttribute("data-theme");
+  if (current !== "light" && current !== "dark") {
+    try { current = localStorage.getItem("dokukaki-theme"); } catch (e) { current = null; }
+  }
+  apply(current === "light" ? "light" : "dark");
+  var btn = document.getElementById("themeToggle");
+  if (btn && btn.addEventListener) {
+    btn.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+      apply(next);
+      try { localStorage.setItem("dokukaki-theme", next); } catch (e) { /* 保存できなくても切り替え自体は有効 */ }
+    });
+  }
+})();
+
 // ===== pdf.js 設定（ローカル同梱、外部 CDN には依存しない） =====
 if (window.pdfjsLib) {
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = "lib/pdf.worker.min.js";
