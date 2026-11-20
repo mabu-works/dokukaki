@@ -146,7 +146,7 @@ redoBtn.addEventListener("click", () => {
 
 // ===== 自動保存（localStorage） =====
 function storageKey() {
-  return "kakiko:" + fileKey;
+  return "dokukaki:" + fileKey;
 }
 
 function scheduleSave() {
@@ -486,7 +486,7 @@ function downloadCanvas(canvas, filename) {
 }
 
 function baseNameWithoutExt() {
-  return (fileName || "kakiko").replace(/\.[^.]+$/, "");
+  return (fileName || "dokukaki").replace(/\.[^.]+$/, "");
 }
 
 $("exportCurrentBtn").addEventListener("click", () => {
