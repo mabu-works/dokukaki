@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ドクカキ｜ドキュメント書き込みツール</title>
+<meta name="description" content="PDFや画像を開いて、その場で手書き・テキストで書き込めるWebツール。ファイルはブラウザの外に送信されません。">
+<meta name="theme-color" content="#0a0f1c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<script>
+// 🌙 描画前に保存済みテーマを反映する（ちらつき防止）
+try {
+  var savedTheme = localStorage.getItem("dokukaki-theme");
+  if (savedTheme === "light" || savedTheme === "dark") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) { /* テーマ保存が使えない環境ではダークを既定にする */ }
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- 🧭 トップバー -->
+<nav class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top">ドクカキ</a>
+    <span class="nav-note">ファイルはブラウザの外に送信されません</span>
+    <span class="topbar-actions">
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="テーマ切り替え">🌙</button>
+    </span>
+  </div>
+</nav>
+
+<!-- 🧭 ヘッダー -->
+<header class="site-header" id="top">
+  <p class="eyebrow">DOCUMENT ANNOTATION</p>
+  <h1>ドクカキ</h1>
+  <p class="tagline">ドキュメント書き込みツール</p>
+  <p class="privacy-note">ファイルはブラウザの外に送信されません。すべての処理はこの端末の中で行われます。</p>
+</header>
+
+<!-- ✏️ 書き込みツール本体 -->
+<main>
+  <!-- 📂 ファイルを開く -->
+  <section class="card" id="dropCard">
+    <h2>ファイルを開く</h2>
+    <div id="dropZone" class="drop-zone" tabindex="0">
+      <p>ここに PDF / PNG / JPG をドラッグ＆ドロップ</p>
+      <p class="note">または</p>
+      <label class="btn btn-primary file-label" for="fileInput">ファイルを選択</label>
+      <input id="fileInput" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" hidden>
+    </div>
+    <p id="fileInfo" class="note" aria-live="polite">まだファイルを開いていません。</p>
+    <p id="loadMsg" class="note" aria-live="polite"></p>
+  </section>
+
+  <!-- 🛠️ ツール -->
+  <section class="card" id="toolbarCard" hidden>
+    <h2>ツール</h2>
+    <div class="toolbar" role="toolbar" aria-label="書き込みツール">
+      <button class="btn tool-btn is-active" type="button" data-tool="pen">ペン</button>
+      <button class="btn tool-btn" type="button" data-tool="marker">マーカー</button>
+      <button class="btn tool-btn" type="button" data-tool="text">テキスト</button>
+      <button class="btn tool-btn" type="button" data-tool="eraser">消しゴム</button>
+    </div>
+    <div class="tool-options">
+      <label>色 <input id="colorInput" type="color" value="#e03131"></label>
+      <label>太さ <input id="sizeInput" type="range" min="1" max="20" value="3"> <span id="sizeValue">3</span></label>
+      <button id="undoBtn" class="btn btn-sub" type="button" disabled>元に戻す</button>
+      <button id="redoBtn" class="btn btn-sub" type="button" disabled>やり直し</button>
+    </div>
+    <div id="textInputRow" class="text-input-row" hidden>
+      <input id="textInput" type="text" placeholder="配置するテキストを入力" maxlength="200">
+      <span class="note">入力後、ページ上をクリック／タップした場所に配置します</span>
+    </div>
+  </section>
+
+  <!-- 🖼️ ビューア -->
+  <section class="card" id="viewerCard" hidden>
+    <div class="pager">
+      <button id="prevBtn" class="btn btn-sub" type="button">← 前へ</button>
+      <span id="pageInfo" class="page-info">- / -</span>
+      <button id="nextBtn" class="btn btn-sub" type="button">次へ →</button>
+    </div>
+    <div id="canvasWrap" class="canvas-wrap">
+      <canvas id="baseCanvas"></canvas>
+      <canvas id="annotCanvas"></canvas>
+    </div>
+    <p class="note">ペン／マーカー／消しゴムはドラッグ、テキストは入力後にクリックで配置します。</p>
+  </section>
+
+  <!-- 📄 ページ一覧 -->
+  <section class="card" id="thumbsCard" hidden>
+    <h2>ページ一覧</h2>
+    <div id="thumbs" class="thumbs"></div>
+  </section>
+
+  <!-- 🎬 プレゼン・書き出し・保存 -->
+  <section class="card" id="actionsCard" hidden>
+    <h2>プレゼン・書き出し・保存</h2>
+    <div class="actions">
+      <button id="slideshowBtn" class="btn btn-primary" type="button">スライドショー</button>
+      <button id="exportCurrentBtn" class="btn btn-sub" type="button">現在のページを PNG で書き出し</button>
+      <button id="exportAllBtn" class="btn btn-sub" type="button">全ページを PNG で書き出し</button>
+      <button id="exportPdfBtn" class="btn btn-sub" type="button">全ページを PDF で書き出し</button>
+      <button id="clearSaveBtn" class="btn btn-sub" type="button">保存した書き込みを消す</button>
+    </div>
+    <p id="actionMsg" class="note" aria-live="polite"></p>
+    <p class="note">書き込みは自動でこのブラウザに保存されます。同じファイルを開き直すと復元されます。</p>
+  </section>
+</main>
+
+<!-- 🎬 スライドショー表示レイヤー -->
+<div id="slideshow" class="slideshow" hidden>
+  <canvas id="slideCanvas"></canvas>
+  <div class="slideshow-bar">
+    <span id="slideInfo">- / -</span>
+    <span>← → キー／クリックで移動、Esc で終了</span>
+    <button id="slideExitBtn" class="btn btn-sub" type="button">終了</button>
+  </div>
+</div>
+
+<!-- 🔗 フッター -->
+<footer class="site-footer">
+  <p>ドクカキ — ファイルはブラウザの外に送信されません</p>
+</footer>
+
+<script src="lib/pdf.min.js"></script>
+<script src="lib/pdfwriter.js"></script>
+<script src="lib/core.js"></script>
+<script src="app.js"></script>
+<script>
+// 📦 Service Worker を登録する（オフラインキャッシュ）
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
